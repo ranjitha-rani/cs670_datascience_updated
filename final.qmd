@@ -183,6 +183,9 @@ The columns having major missing values include: attack_cat; is_ftp_login, ct_fl
 
 
 ### 2.4.1 Handling 'attack_cat'
+
+attack_cat: The name of each attack category. In this data set , nine categories e.g. Fuzzers, Analysis, Backdoors, DoS Exploits, Generic, Reconnaissance, Shellcode and Worms
+
 To ensure consistency :
 
 -**Handled Missing Values** – Assigned "unknown_attack" to missing attack labels where label = 1 and "normal" otherwise.
@@ -231,6 +234,8 @@ print(merged_df[['attack_cat', 'attack_cat_encoded']].drop_duplicates())
 
 ### 2.4.2 'Handling ct_flw_http_mthd'
 
+ct_flw_http_mthd: Number of flows that has methods such as Get and Post in http service.
+
 To ensure data consistency, we impute missing values in ct_flw_http_mthd (HTTP flow methods) using a data-driven approach:
 
 **Identified Mode & Median** The most frequent (mode) and middle value (median) were computed.
@@ -259,11 +264,13 @@ print(merged_df['ct_flw_http_mthd'].describe())
 
 ### 2.4.3 'Handling is_ftp_login'
 
-To maintain accuracy while filling missing values in is_ftp_login, :
+is_ftp_login: If the ftp session is accessed by user and a password then it is - 1 or else is 0.
 
-**Group by Protocol (proto)** Since FTP-related logins depend on protocol type, missing values are filled using the most frequent (mode) value within each protocol group.
-**-** If no mode exists for a group, we assign 0 (assuming no FTP login).
-**-** The column remains in integer format for model compatibility.
+**To maintain accuracy while filling missing values in is_ftp_login** :
+
+- Group by Protocol (proto): Since FTP-related logins depend on protocol type, missing values are filled using the most frequent (mode) value within each protocol group.
+- If no mode exists for a group, we assign 0 (assuming no FTP login).
+- The column remains in integer format for model compatibility.
 
 ```{python}
 #| code-fold: true
@@ -289,6 +296,8 @@ print(merged_df['is_ftp_login'].value_counts())
 ### 2.4.4 'Handling ct_ftp_cmd'
 
 
+ct_ftp_cmd: Number of flows that has a command in ftp session.
+
 Some rows in the `ct_ftp_cmd` column contained empty strings instead of numeric values. To ensure consistency and avoid errors during modeling, replace blank entries with `'0'` and convert the column to integer type.
 
 ```{python}
@@ -301,6 +310,10 @@ merged_df['ct_ftp_cmd'] = merged_df['ct_ftp_cmd'].replace(' ', '0').fillna(0).as
 
 ### 2.4.5 'Handling sport and dsport'
 
+sport: source port number
+dsport: destination port number
+
+Checking and ensuring all the port numbers to be of integer type so that it does not cause any interruptions with data analysis.
 
 ```{python}
 merged_df['sport'] = pd.to_numeric(merged_df['sport'], errors='coerce').astype('Int64')
@@ -513,6 +526,7 @@ plt.show()
 ```
 
 **Inference**:
+
 - Certain features like ct_state_ttl and ct_dst_sport_ltm show clear class separation, where some categories occupy distinct bands or regions — indicating high predictive potential.
 
 - ct_flw_http_mthd and ct_ftp_cmd are sparse but distinct for a few attack categories, possibly linked to specific protocol misuse (e.g., HTTP-based fuzzing or FTP-based backdoors).
@@ -1635,15 +1649,16 @@ plt.show()
 
 The analysis of network traffic using the UNSW-NB15 Dataset has high importance for individuals working on cybersecurity and network management .
 
-- **Cybersecurity and IT professionals**:
-The methods and insights presented in this study support more effective intrusion detection by identifying suspicious patterns and behaviors in network traffic.
+**For**:
 
-By implementing well-performing models like XGBoost(preferably) and Random Forest Classifiers – security analysts can automate the process of anomaly detection, prioritize threat responses.
+- Cybersecurity and IT professionals:
 
-- **Organizations and Businesses handling Intrusion Detection systems**:
+The methods and insights presented in this study support more effective intrusion detection by identifying suspicious patterns and behaviors in network traffic.By implementing well-performing models like XGBoost(preferably) and Random Forest Classifiers , security analysts can automate the process of anomaly detection, prioritize threat responses.
+
+- Organizations and Businesses handling Intrusion Detection systems :
 Identifying risks , will reduce the system downtime and save up the resources. Helps them maintain service continuity, thus protecting sensitive data.
 
-- **Research and Academic**:
+- Research and Academic:
 This analysis helps analyze practical workflow of how large network datasets are gathered and how they can be studied, what parameters are needed to enhance the models. In total , helping to develop academic level models for network safety
 
 Through comprehensive modeling and evaluation, the XGBoost classifier emerged as the best-performing model, consistently delivering high accuracy, F1-score, ROC AUC, and AUPRC, especially on the imbalanced UNSW-NB15 dataset. While regression offers strong interpretability, and Random Forest achieved competitive performance, XGBoost demonstrated the best trade-off between precision and recall. Our use of mutual information for feature selection, along with resampling techniques and metric-based evaluation, significantly improved model robustness. This analysis highlights the critical role of feature engineering, model tuning, and metric selection in building effective intrusion detection systems capable of identifying cyber threats in real-world network traffic.
